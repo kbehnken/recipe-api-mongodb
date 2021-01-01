@@ -15,8 +15,8 @@ module.exports = app => {
     // Return a single Recipe with recipeId
     app.get('/api/v1/recipes/:recipeId', recipes.findByRecipeId);
 
-    // Return all recipes with userId
-    // app.get('/api/v1/recipes-by-author/:userId', recipes.findByUserId);
+    // Return all recipes owned by user
+    app.get('/api/v1/my-recipes', recipes.findMyRecipes);
 
     // Update a recipe with recipeId
     // app.put('/api/v1/recipes/:recipeId', upload.single('imageFile'), recipes.update);
