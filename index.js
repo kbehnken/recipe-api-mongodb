@@ -6,7 +6,7 @@ const express = require('express');
 const bodyParser = require('body-parser');
 const app = express();
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-// const expressJwt = require('express-jwt');
+const expressJwt = require('express-jwt');
 const port = process.env.SERVER_PORT;
 
 // Parse requests of content-type: application/json
@@ -14,6 +14,9 @@ app.use(bodyParser.json());
 
 // Parse requests of content-type: application/x-www-form-urlencoded
 app.use(bodyParser.urlencoded({ extended: true }));
+
+// CORS
+app.use(cors({origin: '*'}));
 
 // Auth middleware
 const jwtOptions = {
@@ -23,11 +26,10 @@ const jwtOptions = {
 const unauthenticatedRoutes = {
     path: ['/api/v1/login']
 }
-// app.use(expressJwt(jwtOptions)
-// .unless(unauthenticatedRoutes));
+app.use(expressJwt(jwtOptions)
+.unless(unauthenticatedRoutes));
 
-app.use(cors({origin: '*'}));
-
+// Start server
 app.listen(port, () => console.log(`Listening on ` + port));
 
 // Routes

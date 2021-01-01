@@ -6,7 +6,6 @@ const userModel = mongoose.model('User', userSchema);
 
 exports.login = (req, res, next) => {
     const { email, password } = req.body;
-    
     userModel.findOne({
         email: email
     })
