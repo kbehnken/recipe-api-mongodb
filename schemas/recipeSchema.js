@@ -20,7 +20,11 @@ const Recipe = new mongoose.Schema({
             name: String,
             quantity: String
         }
-    ]
+    ],
+    isShared: {
+        type: Boolean,
+        required: [true, 'Is Shared is required']
+    },
 },{timestamps: true});
 
 module.exports = Recipe;
