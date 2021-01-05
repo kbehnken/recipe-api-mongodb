@@ -89,3 +89,66 @@ exports.findByOwnerId = async (req, res, next) => {
     })
 }
 
+// Add a favorite recipe
+exports.addFavoriteRecipe = async (req, res, next) => {
+    const { recipeId } = req.body;
+    const userId = req.user._id;
+    
+    return userModel.findById(userId)
+    .then(user => {
+        user.favoriteRecipes.push(recipeId);
+        let seen = {};
+        user.favoriteRecipes = user.favoriteRecipes.filter(item => {
+            return seen.hasOwnProperty(item.toString())
+                ? false
+                : (seen[item.toString()] = true)
+        })
+        user.save()
+        .then(() => {
+            res.status(200).send('Successfully added recipe to favorites');
+        })
+    })
+    .catch(err => {
+        console.log(err);
+    })
+}
+
+exports.findFavoriteRecipesByUserId = async (req, res, next) => {
+    const userId = req.user._id;
+
+    await userModel.findById(userId)
+    .then(result => {
+        res.status(200).send(result)
+    })
+    .catch(err => {
+        console.log(err);
+    })
+}
+
+exports.deleteFavoriteRecipe = (req, res, next) => {
+    const recipeId = mongoose.Types.ObjectId(req.body.recipeId);
+    const userId = req.user._id;
+
+    userModel.findById(userId)
+    .then(user => {
+        const favoriteRecipe = user.favoriteRecipes.indexOf(recipeId);
+
+        user.favoriteRecipes.splice(favoriteRecipe, 1);
+        user.save()
+        .then(() => {
+            res.status(200).send('Successfully removed recipe from favorites')
+        })
+    })
+}
+
+exports.findRecentRecipes = (req, res, next) => {
+    const { number } = req.params;
+
+    return recipeModel.find().sort({createdAt: 'desc'}).limit(parseInt(number))
+    .then(result => {
+        res.status(200).send(result);
+    })
+    .catch(err => {
+        console.log(err);
+    })
+}

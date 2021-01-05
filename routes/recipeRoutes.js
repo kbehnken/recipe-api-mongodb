@@ -24,6 +24,18 @@ module.exports = app => {
     // // Delete a recipe with recipeId
     // app.delete('/api/v1/recipes/:recipeId', recipes.delete);
 
+    // Add a new favorite recipe
+    app.post('/api/v1/recipes/favorites', recipes.addFavoriteRecipe);
+
+    // Return all favorite recipes with userId
+    app.get('/api/v1/recipes/favorites/:userId', recipes.findFavoriteRecipesByUserId);
+ 
+    // Delete a favorite recipe with recipeId
+    app.delete('/api/v1/recipes/favorites', recipes.deleteFavoriteRecipe);
+
+    // Return recently added recipes
+    app.get('/api/v1/recipes/recent/:number', recipes.findRecentRecipes);
+
     // // Return an image with recipeId
     // app.get('/api/v1/recipes/photos/:recipeId', recipes.findPhoto);
 
