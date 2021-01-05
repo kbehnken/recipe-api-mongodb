@@ -1,7 +1,7 @@
 const mongoose = require('mongoose');
 
 const Recipe = new mongoose.Schema({
-    owner: String,
+    ownerId: mongoose.Types.ObjectId,
     name: {
         type: String,
         required: [true, 'Name is required']
@@ -9,7 +9,10 @@ const Recipe = new mongoose.Schema({
     fromTheKitchenOf: String,
     description: String,
     serves: Number,
-    prepTime: String,
+    prepTime: {
+        type: String,
+        required: [true, 'Prep Time is required']
+    },
     cookTime: String,
     directions: String,
     ingredients: [
