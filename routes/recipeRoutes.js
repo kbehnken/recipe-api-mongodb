@@ -7,25 +7,22 @@ const upload = multer({
 
 module.exports = app => {
     // Create a new recipe
-    app.post('/api/v1/recipes', upload.single('imageFile'), recipes.create);
+    app.post('/api/v1/recipes', upload.single('imageFile'), recipes.createRecipe);
 
     // Return all recipes
     app.get('/api/v1/recipes', recipes.findAll);
 
     // Return a single Recipe with recipeId
-    app.get('/api/v1/recipes/:recipeId', recipes.findByRecipeId);
+    app.get('/api/v1/recipes/by-recipe-id/:recipeId', recipes.findByRecipeId);
 
     // Return all recipes owned by user
-    app.get('/api/v1/my-recipes', recipes.findMyRecipes);
+    app.get('/api/v1/recipes/by-owner-id/:ownerId', recipes.findByOwnerId);
 
     // Update a recipe with recipeId
     // app.put('/api/v1/recipes/:recipeId', upload.single('imageFile'), recipes.update);
 
     // // Delete a recipe with recipeId
     // app.delete('/api/v1/recipes/:recipeId', recipes.delete);
-
-    // // Return recently added recipes
-    // app.get('/api/v1/recent-recipes', recipes.findRecentRecipes);
 
     // // Return an image with recipeId
     // app.get('/api/v1/recipes/photos/:recipeId', recipes.findPhoto);
