@@ -114,11 +114,13 @@ exports.addFavoriteRecipe = async (req, res, next) => {
 }
 
 exports.findFavoriteRecipesByUserId = async (req, res, next) => {
-    const userId = req.user._id;
+    const { userId } = req.params;
 
     await userModel.findById(userId)
+    .populate('favoriteRecipes')
     .then(result => {
-        res.status(200).send(result)
+        
+        res.status(200).send(result.favoriteRecipes)
     })
     .catch(err => {
         console.log(err);
