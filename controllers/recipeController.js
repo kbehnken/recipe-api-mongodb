@@ -113,6 +113,7 @@ exports.addFavoriteRecipe = async (req, res, next) => {
     })
 }
 
+// Return all favorite recipes with userId
 exports.findFavoriteRecipesByUserId = async (req, res, next) => {
     const { userId } = req.params;
 
@@ -127,6 +128,7 @@ exports.findFavoriteRecipesByUserId = async (req, res, next) => {
     })
 }
 
+// Delete a favorite recipe
 exports.deleteFavoriteRecipe = (req, res, next) => {
     const recipeId = mongoose.Types.ObjectId(req.body.recipeId);
     const userId = req.user._id;
@@ -143,6 +145,7 @@ exports.deleteFavoriteRecipe = (req, res, next) => {
     })
 }
 
+//Return a specified number of recent recipes
 exports.findRecentRecipes = (req, res, next) => {
     const { number } = req.params;
 
