@@ -7,7 +7,10 @@ const Recipe = new mongoose.Schema({
         required: [true, 'Name is required']
     },
     fromTheKitchenOf: String,
-    description: String,
+    description: {
+        type: String,
+        maxlength: 4500
+    },
     serves: Number,
     prepTime: {
         type: String,
@@ -26,5 +29,9 @@ const Recipe = new mongoose.Schema({
         required: [true, 'Is Shared is required']
     },
 },{timestamps: true});
+
+Recipe.index({
+    name: 'text'
+})
 
 module.exports = Recipe;

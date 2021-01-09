@@ -40,5 +40,5 @@ module.exports = app => {
     // app.get('/api/v1/recipes/photos/:recipeId', recipes.findPhoto);
 
     // // Return search results
-    // app.post('/api/v1/search-recipes', recipes.findSearchResults);
+    app.post('/api/v1/search-recipes', recipes.findSearchResults);
 };

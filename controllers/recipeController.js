@@ -11,7 +11,7 @@ exports.createRecipe = async (req, res, next) => {
 
     return recipe.save()
     .then(result => {
-        res.status(200).send(result)
+        res.status(200).send(result);
     })
     .catch(err => {
         console.log(err);
@@ -29,10 +29,10 @@ exports.findAll = async (req, res, next) => {
             .then(user => {
                 const ownerName = user[0].firstName + ' ' + user[0].lastName;
 
-                result[i] = {...result[i].toObject(), ownerName: ownerName}
+                result[i] = {...result[i].toObject(), ownerName: ownerName};
             })
         }
-        res.status(200).send(result)
+        res.status(200).send(result);
     })
     .catch(err => {
         console.log(err);
@@ -55,14 +55,14 @@ exports.findByRecipeId = async (req, res, next) => {
                     isFavorite = true;
                 }
             }
-            recipe = {...recipe.toObject(), isFavorite}
+            recipe = {...recipe.toObject(), isFavorite};
         })
-        res.status(200).send(recipe)
+        res.status(200).send(recipe);
     })
     .catch(err => {
         console.log(err);
     })
-}
+};
 
 // Return all recipes with ownerId
 exports.findByOwnerId = async (req, res, next) => {
@@ -80,14 +80,14 @@ exports.findByOwnerId = async (req, res, next) => {
     })
     .then(result => {
         for (let i = 0; i < result.length; i++) {
-            result[i] = {...result[i].toObject(), ownerName: ownerName}
+            result[i] = {...result[i].toObject(), ownerName: ownerName};
         }
-        res.status(200).send(result)
+        res.status(200).send(result);
     })
     .catch(err => {
         console.log(err);
     })
-}
+};
 
 // Add a favorite recipe
 exports.addFavoriteRecipe = async (req, res, next) => {
@@ -98,6 +98,7 @@ exports.addFavoriteRecipe = async (req, res, next) => {
     .then(user => {
         user.favoriteRecipes.push(recipeId);
         let seen = {};
+
         user.favoriteRecipes = user.favoriteRecipes.filter(item => {
             return seen.hasOwnProperty(item.toString())
                 ? false
@@ -111,7 +112,7 @@ exports.addFavoriteRecipe = async (req, res, next) => {
     .catch(err => {
         console.log(err);
     })
-}
+};
 
 // Return all favorite recipes with userId
 exports.findFavoriteRecipesByUserId = async (req, res, next) => {
@@ -120,13 +121,12 @@ exports.findFavoriteRecipesByUserId = async (req, res, next) => {
     await userModel.findById(userId)
     .populate('favoriteRecipes')
     .then(result => {
-        
-        res.status(200).send(result.favoriteRecipes)
+        res.status(200).send(result.favoriteRecipes);
     })
     .catch(err => {
         console.log(err);
     })
-}
+};
 
 // Delete a favorite recipe
 exports.deleteFavoriteRecipe = (req, res, next) => {
@@ -140,12 +140,12 @@ exports.deleteFavoriteRecipe = (req, res, next) => {
         user.favoriteRecipes.splice(favoriteRecipe, 1);
         user.save()
         .then(() => {
-            res.status(200).send('Successfully removed recipe from favorites')
+            res.status(200).send('Successfully removed recipe from favorites');
         })
     })
-}
+};
 
-//Return a specified number of recent recipes
+// Return a specified number of recent recipes
 exports.findRecentRecipes = (req, res, next) => {
     const { number } = req.params;
 
@@ -156,4 +156,21 @@ exports.findRecentRecipes = (req, res, next) => {
     .catch(err => {
         console.log(err);
     })
-}
+};
+
+// Return search results
+exports.findSearchResults = (req, res, next) => {
+    const { query } = req.body;
+
+    return recipeModel.find({
+        $text: {
+            $search: query
+        }
+    })
+    .then(result => {
+        res.status(200).send(result);
+    })
+    .catch(err => {
+        console.log(err);
+    })
+};
