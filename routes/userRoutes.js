@@ -17,6 +17,6 @@ module.exports = app => {
     // app.delete('/api/v1/users/:userId', users.delete);
 
     // Update a user password with userId
-    // app.put('/api/v1/change-password', users.updatePassword);
+    app.put('/api/v1/change-password', users.updatePassword);
 
 };
