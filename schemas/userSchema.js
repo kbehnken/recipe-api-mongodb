@@ -21,6 +21,12 @@ const User = new mongoose.Schema({
         type: Boolean,
         required: [true, 'Is Admin is required']
     },
+    favoriteRecipes: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: 'Recipe'
+        }
+    ]
 },{timestamps: true});
 
 module.exports = User;
