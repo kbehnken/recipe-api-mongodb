@@ -2,7 +2,7 @@ require('dotenv').config();
 
 const jwt = require('jsonwebtoken');
 const accessTokenSecret = process.env.ACCESS_TOKEN_SECRET;
-const maxTokenLifetime = '1h';
+const maxTokenLifetime = '72h';
 const signToken = function (data) {
     return jwt.sign(
         {
