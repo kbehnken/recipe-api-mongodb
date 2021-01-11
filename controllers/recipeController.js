@@ -3,19 +3,57 @@ const recipeSchema = require('../schemas/recipeSchema');
 const recipeModel = mongoose.model('Recipe', recipeSchema);
 const userSchema = require('../schemas/userSchema');
 const userModel = mongoose.model('User', userSchema);
+const fs = require('fs');
+const path = require('path');
+const fileType = require('file-type');
+const handleFileUpload = require('../helpers/handleFileUpload');
+const isAllowedFileType = require('../helpers/isAllowedFileType');
 
 // Create and save a new recipe
 exports.createRecipe = async (req, res, next) => {
-    const recipe = new recipeModel(req.body);
+    const recipe = new recipeModel(JSON.parse(req.body.recipe));
+    console.log(recipe.toObject())
     recipe.ownerId = req.user._id;
-
+    if (req.file && await isAllowedFileType(req.file.buffer) !== true) {
+        return res.status(415).send();
+    }
     return recipe.save()
     .then(result => {
+        if (req.file) {
+            handleFileUpload(req.file.buffer, recipe._id);
+        }
         res.status(200).send(result);
     })
     .catch(err => {
         console.log(err);
     })
+};
+
+// Update and save an existing recipe with recipeId
+exports.updateRecipe = async (req, res, next) => {
+    const { recipeId } = req.params;
+    const userId = req.user._id;
+    let recipe = await recipeModel.findById(recipeId)
+    if (req.file && await isAllowedFileType(req.file.buffer) !== true) {
+        return res.status(415).send();
+    }
+    let newRecipe = JSON.parse(req.body.recipe);
+    if (userId == recipe.ownerId) {
+        Object.entries(newRecipe).forEach(([key, value]) => {
+            recipe[key] = value;
+        })
+        if (req.file) {
+            handleFileUpload(req.file.buffer, recipe._id);
+        }
+        return recipe.save()
+        .then(() => {
+            res.status(200).send('Sucessfully updated recipe');
+        })
+        .catch(err => {
+            console.log(err);
+        })
+    }
+    return res.status(401).send('You do not have permission to edit this recipe')
 };
 
 // Return all recipes
@@ -156,6 +194,36 @@ exports.findRecentRecipes = (req, res, next) => {
     .catch(err => {
         console.log(err);
     })
+};
+
+// Return a recipe image
+exports.findPhoto = async (req, res) => {
+    const { recipeId } = req.params;
+    const fileName = path.join(__dirname, '../', process.env.PHOTO_PATH + '/' + 'recipe-photo-' + recipeId);
+    if (fs.existsSync(fileName)){
+        const type = await fileType.fromFile(fileName);
+        let contentType = '';
+        switch(type.ext) {
+            case 'jpg':
+            case 'jpeg':
+            contentType = 'image/jpeg';
+            break;
+            case 'png':
+            contentType = 'image/png';
+            break;
+            case 'gif':
+            contentType = 'image/gif';
+            break;
+        }
+        const options = {
+            headers: {
+            'Content-Type': contentType
+            }
+        }
+        res.sendFile(fileName, options);
+    } else {
+        res.status(404).send();
+    }
 };
 
 // Return search results
