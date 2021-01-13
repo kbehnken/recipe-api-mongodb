@@ -36,6 +36,9 @@ module.exports = app => {
     // Return recently added recipes
     app.get('/api/v1/recipes/recent/:number', recipes.findRecentRecipes);
 
+    // Add a new comment
+    app.post('/api/v1/recipes/comments', recipes.addComment);
+
     // Return an image with recipeId
     app.get('/api/v1/recipes/photos/:recipeId', recipes.findPhoto);
 

@@ -1,7 +1,10 @@
 const mongoose = require('mongoose');
 
 const Recipe = new mongoose.Schema({
-    ownerId: mongoose.Types.ObjectId,
+    ownerId: {
+        type: mongoose.Types.ObjectId,
+        required: [true, 'Owner ID is required']
+    },
     name: {
         type: String,
         required: [true, 'Name is required']
@@ -28,6 +31,12 @@ const Recipe = new mongoose.Schema({
         type: Boolean,
         required: [true, 'Is Shared is required']
     },
+    comments: [
+        {
+            type: mongoose.Types.ObjectId,
+            ref: 'Comment'
+        }
+    ]
 },{timestamps: true});
 
 Recipe.index({
