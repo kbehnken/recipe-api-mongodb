@@ -3,6 +3,8 @@ const recipeSchema = require('../schemas/recipeSchema');
 const recipeModel = mongoose.model('Recipe', recipeSchema);
 const userSchema = require('../schemas/userSchema');
 const userModel = mongoose.model('User', userSchema);
+const commentSchema = require('../schemas/commentSchema');
+const commentModel = mongoose.model('Comment', commentSchema);
 const fs = require('fs');
 const path = require('path');
 const fileType = require('file-type');
@@ -58,7 +60,9 @@ exports.updateRecipe = async (req, res, next) => {
 
 // Return all recipes
 exports.findAll = async (req, res, next) => {
-    return recipeModel.find({})
+    const loggedInUserId = req.user._id;
+
+    return recipeModel.find({$or: [{isShared: true}, {ownerId: loggedInUserId}]})
     .then(async result => {
         for (let i = 0; i < result.length; i++) {
             await userModel.find({
@@ -80,11 +84,18 @@ exports.findAll = async (req, res, next) => {
 // Return a single recipe with recipeId
 exports.findByRecipeId = async (req, res, next) => {
     const recipeId = req.params.recipeId;
-    const userId = req.user._id;
+    const loggedInUserId = req.user._id;
 
-    return recipeModel.findById(recipeId)
+    return await recipeModel.findById(recipeId).populate(
+        {
+            path: 'comments',
+            populate: {
+                path: 'owner'
+            }
+        }
+    )
     .then(async recipe => {
-        await userModel.findById(userId)
+        await userModel.findById(loggedInUserId)
         .then(user => {
             let isFavorite = false;
 
@@ -105,17 +116,17 @@ exports.findByRecipeId = async (req, res, next) => {
 // Return all recipes with ownerId
 exports.findByOwnerId = async (req, res, next) => {
     const userId = req.params.ownerId;
+    const loggedInUserId = req.user._id;
     let ownerName = '';
 
-    await userModel.find({
-        _id: userId
-    })
+    await userModel.find({_id: userId})
     .then(user => {
         ownerName = user[0].firstName + ' ' + user[0].lastName;
     });
-    return recipeModel.find({
-        ownerId: userId
-    })
+    return recipeModel.find().and([
+        {ownerId: userId},
+        {$or: [{isShared: true}, {ownerId: loggedInUserId}]}
+    ])
     .then(result => {
         for (let i = 0; i < result.length; i++) {
             result[i] = {...result[i].toObject(), ownerName: ownerName};
@@ -130,9 +141,9 @@ exports.findByOwnerId = async (req, res, next) => {
 // Add a favorite recipe
 exports.addFavoriteRecipe = async (req, res, next) => {
     const { recipeId } = req.body;
-    const userId = req.user._id;
+    const loggedInUserId = req.user._id;
     
-    return userModel.findById(userId)
+    return userModel.findById(loggedInUserId)
     .then(user => {
         user.favoriteRecipes.push(recipeId);
         let seen = {};
@@ -186,10 +197,38 @@ exports.deleteFavoriteRecipe = (req, res, next) => {
 // Return a specified number of recent recipes
 exports.findRecentRecipes = (req, res, next) => {
     const { number } = req.params;
+    const loggedInUserId = req.user._id;
 
-    return recipeModel.find().sort({createdAt: 'desc'}).limit(parseInt(number))
+    return recipeModel.find({$or: [{isShared: true}, {ownerId: loggedInUserId}]})
+    .sort({createdAt: 'desc'})
+    .limit(parseInt(number))
     .then(result => {
         res.status(200).send(result);
+    })
+    .catch(err => {
+        console.log(err);
+    })
+};
+
+// Add a comment to a recipe with recipeId
+exports.addComment = async (req, res, next) => {
+    const { recipeId } = req.body;
+    const loggedInUserId = req.user._id;
+    const comment = new commentModel(
+        {
+            comment: req.body.comment,
+            owner: loggedInUserId
+        }
+    );
+    const commentId = await comment.save();
+    
+    return recipeModel.findById(recipeId)
+    .then(recipe => {
+        recipe.comments.push(commentId);
+        recipe.save()
+        .then(() => {
+            res.status(200).send('Successfully added comment')
+        })
     })
     .catch(err => {
         console.log(err);
